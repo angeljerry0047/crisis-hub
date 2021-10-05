@@ -1,0 +1,44 @@
+<div class="spinner-wrapper" id="spinner">
+    <div class="spinner"></div>
+    <p id="spinner-message">Loading data ...</p>
+</div>
+
+<style>
+    .spinner-wrapper {
+        height: 100vh;
+        width: 100%;
+        background-color: rgba(0, 0, 0, 0.8);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+        position: absolute;
+        top:0;
+        z-index: 3;
+    }
+
+    .spinner {
+        border-radius:50%;
+        border:5px solid white;
+        border-color: transparent white;
+        padding: 2em;
+        animation: spin;
+        animation-duration: 1s;
+        animation-iteration-count: infinite;
+    }
+
+    #spinner-message {
+        font-size: 1rem;
+        color:white;
+    }
+
+    @keyframes spin {
+        from {
+            transform: rotate(0deg);
+        }
+
+        to {
+            transform: rotate(360deg);
+        }
+    }
+</style>

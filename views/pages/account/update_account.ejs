@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <link rel="stylesheet" type="text/css" href="/static/css/design.css">
+</head>
+<body>
+    <%- include('../../partial/header') %>
+    <div class="container">
+        <div class="row">
+            <div class="col-md-8">
+                <form action="" method="post" enctype="multipart/form-data">
+                    <p>Edit Account</p>
+
+                    <div class="form-group">
+                        <label for="">Country</label>
+                        <input type="text" name="country" id="country" value="<%= user.country %>" class="form-control">
+                    </div>
+                
+                    <div class="form-group">
+                        <label for="">Job</label>
+                        <input type="text" name="job" id="job" value="<%= user.job %>" class="form-control">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="">Profile Picture</label>
+                        <span><%= user.image %></span>
+                        <input type="file" name="image" id="image" class="form-control">
+                    </div>
+
+                    <div class="form-group">
+                        <button type="submit" class="btn btn-success">Submit</button>
+                    </div>
+                </form>
+            </div>
+
+            <div class="col-md-4">
+                <a class="btn btn-success" href="/change_password/">Change Password</a>
+            </div>
+        </div>
+    <div>
+</body>
+</html>

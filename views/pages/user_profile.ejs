@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Profile</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
+    <script src='https://api.mapbox.com/mapbox-gl-js/v1.12.0/mapbox-gl.js'></script>
+	<link href='https://api.mapbox.com/mapbox-gl-js/v1.12.0/mapbox-gl.css' rel='stylesheet' />
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="/static/css/design.css">
+    <style>
+        h2 {
+            font-size: 1.8rem !important;
+        }
+        .top-bar {
+            position: fixed;
+            top:0;
+            z-index: 1;
+        }
+
+        .container {
+            margin:5em auto;
+            max-width: 728px;
+            padding: 0.5em 0.1em;
+            box-shadow: none;
+            /* display: grid;
+            grid-template-columns: 1fr 1fr;
+            grid-gap: 1em;
+            overflow-x: hidden; */
+        }
+        .profile-header {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .profile-header {
+            border-bottom: 1px solid #ddd;
+            padding: 1em 1.5em;
+        }
+
+        .profile-header .image-section {
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .image-section span {
+            position: absolute;
+            top:15%;
+            right:30%;
+            cursor:pointer;
+        }
+
+        .account-info {
+            margin-top: 1em;
+            position: relative;
+        }
+
+        .account-info .edit-btn {
+            position: absolute;
+            right:2%;
+            top:0%;
+        }
+
+        .image-section img {
+            height: 100px;
+            width: 100px;
+            object-fit: cover;
+        }
+
+        .img-circle {
+            border-radius: 50%;
+        }
+
+        .section-username {
+            align-items: flex-end;
+        }
+
+        .username {
+            position: relative;
+            padding: 0.5rem 0.75rem;
+        }
+
+        .username .badge {
+            position: absolute;
+            right: 0;
+        }
+
+        .account-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr) );
+            margin:0.5em 0;
+        }
+
+        .account-stats p {
+            margin: 0;
+        }
+
+        .event-tab {
+            display: flex;
+            justify-content: center;
+            margin-top: -1px;
+        }
+        .event-tab a {
+            text-transform: uppercase;
+            color:#333;
+            min-width: 100px;
+        }
+
+        .event-tab a.active {
+            border-top: 1px solid #333;
+        }
+
+        .events {
+            display:grid;
+            grid-gap: 2px;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr) ) ;
+            background-color: #fff;
+            margin: 1em 0;
+        }
+
+        figure {
+            margin: 0;
+            cursor: pointer;
+        }
+        
+        figure img {
+            height: 150px;
+            width:100%;
+            object-fit: cover;
+            border-radius: 4px;
+        }
+
+        .popup {
+            width: 100%;
+            height: 92vh;
+            background: rgba(53, 53, 53, 0.726);
+            z-index: 3;
+            position: absolute;
+            top: 50px;
+            display: none;
+        }
+
+        .popup.active {
+            display: block;
+        }
+
+        .event-section {
+            height: 200px;
+            width: 100%;
+            background: #ddd;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+        }
+
+        .event-section a {
+            color:#000E69;
+        }
+
+        .event-section a:hover {
+            text-decoration: none;
+            color:#020d53;
+        }
+
+        .event-card {
+            position: relative;
+        }
+
+        .pending-stamp {
+            height: 150px;
+            width: 100%;
+            background-color: #f1b64b;
+            pointer-events: none;
+            font-weight: 600;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        @media (min-width: 50em) {
+            .profile-header {
+                display: grid;
+                grid-template-columns: 1fr 2fr;
+                grid: 1em;
+            }   
+
+            .account-stats {
+                display: flex;
+            }
+            .account-stats p {
+                margin: 0 0.5em;;
+            }
+
+            .events {
+                display:grid;
+                grid-gap: 2px;
+                grid-template-columns: repeat(auto-fill, minmax(200px, 1fr) ) ;
+                background-color: #fff;
+                margin: 1em 0;
+            }
+            figure img {
+                width:240px; 
+                height: 200px;
+                object-fit: cover;
+            }
+        }
+        
+    </style>
+</head>
+<body>
+    <%- include('../partial/header') %>
+
+    <%- include ('../partial/messages') %>
+
+    <div class="container">
+        <div class="profile-header">
+            <div class="image-section">
+
+                <!-- <span>
+                    <i class="fa fa-plus fa-2x"></i>
+                </span> -->
+                
+                <img src="../../uploads/profile/user.png" class="img-circle" alt="<%= userprofile.username %>">
+            </div>
+
+            <div class="account-info">
+                <% if (user.username == userprofile.username && !userprofile.is_locked) {%>
+                
+                
+                <a href="/update_account/" class="btn btn-success edit-btn">Edit</a>
+                
+                <% } %>
+
+                <div class="d-flex section-username">
+                    <div class="d-flex username">
+                        <h3 class="my-1 mr-1"><%= userprofile.username %></h3>
+                        <span class="badge badge-pill badge-primary"><%= profile.points %></span>
+                    </div>
+                   
+                    <% if (userprofile.is_locked) {%>
+                        <h2 class="text-danger">THIS ACCOUNT HAS BEEN LOCKED</h2>
+                    <%} %>
+                    <% if (user.username != userprofile.username && !userprofile.is_locked) {%>
+                        
+                        <% if (is_following) { %>
+                            <button class="bg-brand ml-1" id="follow-btn" data-action="unfollow">Unfollow</button>
+                        <%} else {%>
+                            <button class="bg-brand ml-1" id="follow-btn" data-action="follow">Follow</button>
+                        <%} %>
+                       
+                        <button class="bg-brand ml-1"><i class="fa fa-lock mr-1"></i>Message</button>
+                    <%} %>
+                </div>
+
+                <div class="d-flex account-stats">
+                    <p class="d-flex"><span class="mr-1"><%= events.length %></span> Events</p>
+                    <p class="d-flex"><span class="mr-1"><%= contributions.length %></span> Contributions</p>
+                    <p class="d-flex">
+                        <span class="mr-1"> 
+                            <% if (userprofile.account_type == 'pro') {%>
+                                <i class="fa fa-lock"></i>
+                            <%} %>  <%= followers.length %>
+                        </span>
+                        Followers 
+                    </p>
+                    <p class="d-flex"><span class="mr-1"> <%= following.length %> </span> Following</p>
+                </div>
+
+                <div class="my-1">
+                    
+
+                    <% if (user.username == userprofile.username && !userprofile.is_locked) {%>
+                
+                    <b>Email</b>
+                    <p> <%= userprofile.email %> </p>
+
+                    <% } %>
+
+
+                    <div class="my-1">
+                        <% if (user.is_admin && userprofile.username != user.username) {%>
+                            <% if (userprofile.is_locked == 0) {%>
+                                <button class="bg-danger ml-1" id="lock-account">Lock Account</button>
+                            <%} else {%> 
+                                <button class="bg-brand ml-1" id="unlock-account">Unlock Account</button>
+                            <%}%>
+                        <%}%>
+                        
+                        <% if (!userprofile.is_admin && userprofile.username != user.username) {%>
+                            <button class="bg-brand ml-1" id="report-button">Report Account</button>
+                        <%} %>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="event-tab">
+            <a href="" class="link active" id="event"><i class="fa fa-calendar mr-1"></i>Events</a>
+            <a href="" class="link" id="contribution"><i class="fa fa-users mr-1"></i>Contribution</a>
+        </div>
+
+        <div class="events" id="events">
+            <%  for (let event of events ) {%>
+                <div class="event-card">
+                    <% if (event.is_published == '0') {%>
+                        <div class="pending-stamp">
+                            PENDING
+                        </div>
+                    <% } else if (event.media ) {%>
+                        <figure data-href="/event/<%= event.event_name %>/<%= event.event_id %>/">
+                            <img src="../.<%= event.media.media %>" alt="Trulli" >
+                            <figcaption> <%= event.event_name %> </figcaption>
+                        </figure>
+                    <% } else { %>
+                        <div class="event-section bg-dark">
+                            <a class="text-white" href="/event/<%= event.event_name %>/<%= event.event_id %>/">
+                                <%= event.event_name %>
+                            </a>
+                           
+                        </div>
+                    <% } %>
+                </div>
+            <% } %>
+        </div>
+
+        <div class="events d-none" id="contributions">
+            <%  for (let contribution of contributions ) {%>
+                <div class="event-card">
+                    <% if (contribution.is_published == '0') { %>
+                        <div class="pending-stamp">
+                            <p>PENDING</p>
+                        </div>
+
+                    <% } else if (contribution.media) {%>
+                        <figure data-href="/event/<%= contribution.event_name %>/<%= contribution.event_id %>/">
+                            <img src="../.<%= contribution.media.media %>" alt="Trulli">
+                            <figcaption> <%= contribution.event_name %> </figcaption>
+                        </figure>
+                    <% } else { %>
+                        <div class="event-section bg-dark">
+                            <a class="text-white" href="/event/<%= contribution.event_name %>/<%= contribution.event_id %>/">
+                                <%= contribution.event_name %>
+                            </a>
+                        </div>
+                    <% } %>
+                </div>
+            <% } %>
+        </div>
+    </div>
+
+    <div class="popup" id="report-section">
+        <div class="content">
+            <div class="close-btn" onclick="togglePopup(reportSection, 'active')">&times;</div>
+            <form action="" id="report-form" method="POST">
+                <label for="reason">Reason for Reporting</label>
+                <textarea name="reason" id="" cols="30" rows="10" placeholder="Reason for reporting account" value=""></textarea>
+
+                <button type="submit" class="btn bg-brand">Report Account</button>
+            </form>
+
+        </div>
+    </div>
+    
+    <%- include ('../partial/messages') %>
+
+    <script>
+        let tabItems = document.querySelectorAll(".event-tab a");
+        tabItems.forEach(tabItem => {
+            
+            $(tabItem).on("click", function(e) {
+                e.preventDefault();
+
+                tabItems.forEach(tb => tb.classList.remove("active"));
+                
+                if(tabItem.id == "contribution") {
+                    tabItem.classList.add("active");
+                    $("#contributions").removeClass("d-none");
+                    $("#events").addClass("d-none")
+                } else {
+                    tabItem.classList.add("active");
+                    $("#contributions").addClass("d-none");
+                    $("#events").removeClass("d-none")
+                }
+            });
+        });
+
+        let eventFigures = document.querySelectorAll("figure");
+        eventFigures.forEach(figure => {
+            $(figure).on("click", function(e) {
+                let location = $(figure).attr("data-href");
+
+                window.location.assign(location);
+            });
+        });
+
+        $("#lock-account").on("click", function(e) {
+            // lock the account
+            $.ajax({
+                url:'/lock_account/<%= userprofile.username %>/',
+                type:'POST',
+                success:function(response) {
+                    console.log(response);
+
+                    if(response.message.includes("success")) {
+                        // reload the page
+                        window.location.reload();
+                    }
+                },
+                error:function(err) {
+                    console.error(err.message);
+                }
+            })
+        });
+
+        $("#unlock-account").on("click", function(e) {
+            // unlock the account
+            $.ajax({
+                url:'/unlock_account/<%= userprofile.username %>/',
+                type:'POST',
+                success:function(response) {
+                    console.log(response);
+
+                    if(response.message.includes("success")) {
+                        // reload the page
+                        window.location.reload();
+                    }
+                },
+                error:function(err) {
+                    console.error(err.message);
+                }
+            })
+        });
+
+        let reportSection = document.getElementById("report-section");
+
+        $("#report-button").on("click", function(e) {
+            togglePopup(reportSection, "active");
+        });
+
+        function togglePopup(element, className="active") {
+            element.classList.toggle(className);
+        }
+
+
+        // report account
+        $("#report-form").on("submit", function(e) {
+            // prevent default behaviour
+            e.preventDefault();
+            
+            let data = $("#report-form").serialize();
+
+            console.log(data);
+
+            $.ajax({
+                url:'/report-account/<%= userprofile.username %>/<%= user.username %>/',
+                data:data,
+                type:'POST',
+                success:function(response) {
+                    let message = response.message;
+                    console.log(message);
+
+                    if(message.includes("Success")) {
+                        $("#report-form").append(
+                            `<div class='alert alert-success'>${message}</div>`
+                        );
+                    } else {
+                        $("#report-form").append(
+                            `<div class='alert alert-danger'>${message}</div>`
+                        );
+                    }
+
+                    setTimeout(() =>{
+                        togglePopup(reportSection, "active");
+                        // reset form
+                        $("#report-form")[0].reset();
+                        $("#report-form .alert").remove();
+                    }, 5000);
+
+                    
+                },
+                error:function(err) {
+                    console.error(err);
+                }
+            })
+        });
+
+        $("#follow-btn").on('click', function(e) {
+            console.log(e);
+
+            // get the action
+            let { action } = e.target.dataset;
+            let url = action == "follow" ? "/follow/" : "/unfollow/";
+            let data = {
+                user_id:parseInt("<%= userprofile.user_id %>"), 
+                follower_id:parseInt("<%= user.user_id %>")
+            };
+
+            console.log(data);
+            console.log(url);
+
+            $.ajax({
+                url:url,
+                type:'POST',
+                data:data,
+                success:function(response) {
+                    console.log(response);
+
+                    // reload the location
+                    window.location.reload();
+                },
+                error:function(error) {
+                    console.log(error);
+                }
+            });
+        });
+
+        // follow/ unfollow request 
+        function updateFollowingStatus() {
+
+        }
+    </script>
+</body>
+</html>

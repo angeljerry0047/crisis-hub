@@ -1,0 +1,85 @@
+<style> 
+    .notification-tab {
+        position: absolute;
+        display: none;
+        top: 50px;
+        z-index: 3;
+        right: 1%;
+        background: white;
+        border-radius: 0px;
+        border: 1px solid #ddd;
+        box-shadow: 0px 0px 0.3em #333;
+        font-size: 14px;
+        width: 280px;
+    }
+
+    div span {
+        font-size: 0.8rem;
+    }
+
+    .notification-tab.open {
+        display: block;
+    }
+
+    .message-item {
+        display: flex;
+        align-items: center;
+        padding:0.5em 0.37em;
+        border-bottom: 1px solid #ddd;
+        justify-content: space-between;
+    }
+
+    .message-item:hover {
+        background-color: rgba(245, 245, 245, 0.637);
+    }
+
+    .btn-read {
+        cursor: pointer;
+    }
+    .close-btn {
+        cursor: pointer;
+        position: absolute;
+        right: 5px;
+        top: 5px;
+        width: 20px;
+        height: 20px;
+        background: #222;
+        color: #fff;
+        font-size: 20px;
+        font-weight: 600;
+        line-height: 18px;
+        text-align: center;
+        border-radius: 50%;
+    }
+
+    .notification-list {
+        max-height: 180px;
+        overflow-y: auto;
+    }
+    .header {
+        border-bottom: 2px solid gray;
+    }
+</style>
+<div class="notification-tab" id="notification-tab">
+    <div class="close-btn" id="close-notification">&times;</div>
+    <div class="header px-2 py-1">Notifications</div>
+
+    <div class="notification-list">
+        <%  for (let notification of notifications ) {%>
+            <div class="message-item" id="message-<%= notification.id %>">
+                <div class="mr-3">
+                    <p class="mx-0 my-0"><%- notification.text %></p>
+                    <span class="text-muted mx-0"><%= new Date(notification.created_on).toDateString() %></span>
+                </div>
+    
+                <div class="btn-read" data-notification="<%= notification.id %>">
+                    <% if (notification.is_read) {%>
+                        <i class="fa fa-envelope-open"></i>
+                    <% } else {%>
+                        <i class="fa fa-envelope"></i>
+                    <% }%>
+                </div>
+            </div>
+        <% }%>
+    </div>
+</div>

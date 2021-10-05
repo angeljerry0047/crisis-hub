@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Update Event Information</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="/static/css/design.css">
+    <style>
+         @media(min-width:50em) {
+            .container {
+                min-width: 500px;
+                margin: 1em auto;
+                font-size: 0.9em;
+                overflow-x: hidden;
+            }
+
+        }
+    </style>
+</head>
+<body>
+    <%- include('../partial/header') %>
+    <div class="container">
+        <div class="content">
+			<h1 class="description-title">Update Your Contribution</h1>            
+            <form class="my-3" action="" method="post" id="event-description" enctype="multipart/form-data">
+				<div class="row">
+					<div class="col">
+						<div>
+							<label for="event_name">Event Name</label>
+							<input type="text" name="event_name" placeholder="Name Event (Use key words)" value="<%= event.event_name %>" required readonly>
+						</div>
+
+						<div>
+							<label for="start_date">Start Date</label>
+							<% if (event.start_date && event.start_date != '0000-00-00') {%>
+								<input 
+									type="date" 
+									name="start_date" 
+									placeholder="Start Date" 
+									value="<%= event.start_date && event.start_date.getFullYear() %>-<% if (event.start_date.getMonth().toString()[1]) {%> <%= event.start_date.getMonth() %><%} else {%>0<%= event.start_date.getMonth() %><% }%>-<%= event.start_date.getDate() %>"
+								/>
+							<% } else {%>
+								<input 
+									type="date" 
+									name="start_date" 
+									placeholder="Start Date" 
+									value=""
+								/>
+							<% }%>
+						</div>
+						<div>
+							<label for="start_time">Start Time</label>
+							<% if (event.start_time) {%>
+								<input 
+									type="time" 
+									name="start_time" 
+									placeholder="Start Time" 
+									value="<%= event.start_time.slice(0,2)%>:<%= event.start_time.slice(3,5) %>"
+								/>
+							<%} else {%>
+								<input 
+									type="time" 
+									name="start_time" 
+									placeholder="Start Time"  
+									value=""
+								/>
+							<%} %>
+						</div>
+
+						<div>
+							<label for="end_date">End Date</label>
+							<% if (event.end_data && event.end_date != '0000-00-00') {%>
+								<input  
+									type="date" 
+									name="end_date" 
+									placeholder="End Date" 
+									value="<%= event.end_date.getFullYear() %>-<% if (event.end_date.getMonth().toString()[1]) {%> <%= event.end_date.getMonth() %><%} else {%>0<%= event.end_date.getMonth() %><% }%>-<%= event.end_date.getDate() %>"
+								/>
+							<% } else {%>
+								<input 
+									type="date" 
+									name="end_date" 
+									placeholder="End Date" 
+									value=""
+								/>
+							<% }%>
+						</div>
+
+						<div>
+							<label for="">End Time</label>
+
+							<% if (event.end_time) {%>
+								<input 
+									type="time" 
+									name="end_time" 
+									placeholder="End Time"  
+									value="<%= event.end_time.slice(0,2)%>:<%= event.end_time.slice(3,5) %>"
+								/>
+							<%} else {%>
+								<input 
+									type="time" 
+									name="end_time" 
+									placeholder="End Time"  
+									value=""
+								/>
+							<%} %>
+						</div>
+
+					</div>
+					<div class="col">
+						
+
+						<div class="mb-2">
+							<label for="event_description">Event Description</label>
+							<textarea 
+								placeholder="Describe the event" 
+								id="description" 
+								name="event_description" 
+								rows="10"
+								maxlength="1000"
+								required
+							><%= event.event_description.toString().trim() %></textarea>
+							<div class="text-muted text-right" id="textarea_message"></div>
+						</div>
+
+						<div>
+							<label for="event-media">Add pictures</label>
+							<input type="file" name="photo" id="file" accept="image/*" multiple>
+						</div>
+
+						<div>
+							<label for="event-media" class="label">Add video</label>
+                			<input type="file" name="video" id="video" accept="video/*" multiple>
+						</div>
+					</div>
+				</div>          
+                <!-- <input type="submit" name="add-event" value="Add Event"> -->
+				<div class="w-100 justify-content-center d-flex">
+					<button type="submit" name="add-event" class="my-3 w-25">Add Event</button>
+				</div>
+            </form>
+        </div>
+    </div>
+
+<script>
+var eventDescription = {};
+var eventDescriptionForm = document.getElementById("event-description");
+$(eventDescriptionForm).on("submit", function(e) {
+	e.preventDefault();
+	
+	// get the form data
+	let data = $(this).serializeArray();
+
+	console.log(data);
+
+	// update event description
+	data.forEach(datum => {
+		let name = datum.name;
+		eventDescription[name] = datum.value; 
+	});
+
+	// event data
+    eventDescription.event_id = parseInt("<%= event.event_id %>");
+	eventDescription.description_id = parseInt("<%= event.description_id %>");
+	eventDescription.added_by = "<%= user.username %>";
+	eventDescription.is_contribution = "<%= event.is_contribution %>";
+
+	console.log(eventDescription);
+
+	// create a FormData object
+	var fd = new FormData();
+
+	Object.keys(eventDescription).forEach(key => {
+		fd.append(key, eventDescription[key]);
+	});
+
+	// add the image file
+	var files = $('#file')[0].files;
+	Object.values(files).forEach((file, index) => {
+		let name = "photo" + index;
+		fd.append(name, file);
+	});
+
+	// fd.append('photo',files);
+
+	// add the video file
+	var video = $('#video')[0].files;
+	Object.values(video).forEach((file, index) => {
+		let name = "video" + index;
+		fd.append(name, file);
+	});
+
+	// fd.append('video',video);
+
+	console.log(fd);
+
+	// submit url
+	let url = eventDescription.description_id ? '/update_event_description/' : '/create_event_description/';
+
+	// submit the data
+	$.ajax({
+		url:url,
+		type:'POST',
+		data:fd,
+		dataType: 'json',
+		contentType: false,
+		processData:false,
+		success:function(response) {
+            console.log(response);
+            
+            // 
+			if(response.message.includes="success") {
+                window.location.assign("/event/<%= event.event_name %>/<%= event.event_id %>/")
+			} else {
+				alert(response.message);
+			}
+
+			// reset the form values
+			eventDescriptionForm.reset();
+            updateEventObject = {};
+			
+		},
+		error:function(error) {
+			// alert("error");
+			console.log(error);
+		}
+	});
+
+});
+</script>
+</body>
+</html>

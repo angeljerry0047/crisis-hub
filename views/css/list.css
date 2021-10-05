@@ -1,0 +1,40 @@
+.main {
+    max-width: 1080px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.table {
+    margin-top: 0em;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+}
+
+thead {
+    background-color:var(--secondary);
+    color:var(--white);
+}
+
+tr th {
+    text-align: left;
+    text-transform: uppercase;
+} 
+
+tbody tr td{
+    border-bottom:1px solid #ddd;
+    padding: 0.4em 0.2em;
+}
+
+.top-bar {
+    /* background-color: var(--white) !important;
+    color:var(--black); */
+}
+
+.pagination-nav {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--light);
+}

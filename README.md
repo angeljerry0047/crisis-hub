@@ -1,2 +1,2 @@
 # crisis-hub
-react-express-template
+Crisis Hub

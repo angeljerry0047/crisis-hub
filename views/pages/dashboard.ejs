@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
+	<link href='https://api.mapbox.com/mapbox-gl-js/v1.12.0/mapbox-gl.css' rel='stylesheet' />
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="/static/css/design.css">
+    <style>
+        body {
+            background-color: rgb(245, 245, 245);
+        }
+
+        .card {
+            padding:1em;
+            box-shadow: 2px 2px 0.4em #ddd;
+            text-align: center;
+            min-width: 80vw;
+            background-color: white;
+            width: 201px;
+        }
+
+        .main {
+            width: 100vw;
+            /* padding: 0 1vw; */
+            display: flex;
+            align-items: center;
+            flex-direction: column;
+        }
+
+        .d-flex {
+            flex-direction: column;
+        }
+
+        @media (min-width: 50em){
+            .card {
+                min-width: 25vw;
+                margin:0.5em;
+            }
+            .d-flex {
+                flex-direction: row;
+            }
+        }
+    </style>
+</head>
+<body>
+    <%- include('../partial/header') %>
+    <div class="main">
+
+        <!-- card section -->
+        <div class="d-flex">
+            <a class="card" href="/contribution_list/" id="saved-events">
+                <h2 class=""><%= contributionCount %></h2>
+                <p>Contribution</p>
+            </a> 
+            
+            <a class="card" href="/pending_contribution" id="saved-events">
+                <h2><%= contribution %></h2>
+                <p>Pending Contribution</p>
+            </a>  
+            <a class="card" href="/reported-contributions/" id="saved-events">
+                <h2 class=""><%= reportedContribution %></h2>
+                <p>Reported Contribution</p>
+            </a>
+        </div>
+
+        <div class="d-flex">
+            <a class="card" href="/event_list/" id="saved-events">
+                <h2 class=""><%= eventsCount %></h2>
+                <p>Events</p>
+            </a> 
+            <a class="card" href="/pending_events" id="saved-events">
+                <h2 class=""><%= unposted_events %></h2>
+                <p>Pending Events</p>   
+            </a>            
+            <a class="card" href="/reported-events/" id="saved-events">
+                <h2 class=""><%= reportEvents %></h2>
+                <p>Reported Events</p>
+            </a>
+        </div> 
+
+        <div class="d-flex">
+            <a class="card" href="/accounts" id="saved-events">
+                <h2 class=""><%= accounts %></h2>
+                <p>Accounts</p>
+            </a>  
+            
+            <a class="card" href="/reported-accounts/" id="saved-events">
+                <h2 class=""><%= reportedAccounts %></h2>
+                <p>Reported Accounts</p>
+            </a>  
+            
+        </div>
+    </div>
+</body>
+</html>

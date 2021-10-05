@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Event Description</title>
+    <script src='https://api.mapbox.com/mapbox-gl-js/v1.12.0/mapbox-gl.js'></script>
+	<link href='https://api.mapbox.com/mapbox-gl-js/v1.12.0/mapbox-gl.css' rel='stylesheet' />
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="/static/css/design.css">
+    <style>
+        .top-bar {
+            position: fixed;
+            top:0;
+            z-index: 1;
+        }
+        h2 {
+            margin:10px 0 0 0;
+        }
+
+        .mt-1 {
+            margin-top: 0.25em;
+        }
+        .mt-5 {
+            margin-top:5em;
+        }
+
+        .my-0 {
+            margin-top:0px;
+            margin-bottom: 0px;
+        }
+
+        .mb-0 {
+            margin-bottom: 0px !important;
+        }
+
+        b {
+            /* color:#333; */
+            font-weight: 600;
+        }
+        .head-menu {
+            justify-content: space-evenly;
+        }
+
+        .event-container {
+            position: relative;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            padding: 0.5rem 0.75rem;
+            box-shadow: 2px 2px 1em #ddd;
+            overflow: hidden;
+        }
+
+        .media {
+            padding:0em 0;
+        }
+
+        /* .media img {
+            /* height: 150px;
+            width: 100%;
+            border-radius: 1em;
+            box-shadow: 1px 1px 0.2em #525;
+            object-fit: cover; 
+        } */
+
+        .bg-brand {
+            background-color: #000e69;
+            color:white;
+        }
+        .btn {
+            border-radius: 4px;
+            font-size: 0.9em;
+        }
+
+        .text-content p {
+            justify-content: space-between;
+        }
+
+        .text-content {
+            /* position: absolute; */
+            z-index: 2;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .text-content div {
+            flex-direction: column;
+        }
+
+        .title {
+            font-size: 1.1em;
+            font-weight: bolder;
+            text-transform: capitalize;
+        }
+
+        .update-section {
+            justify-content: center;
+            padding:0.3em 0.6em;
+        }
+
+        .popup {
+            left: 0;
+            width: 100%;
+            height: 92vh;
+            background: rgba(53, 53, 53, 0.726);
+            z-index: 3;
+            position: absolute;
+            top: 50px;
+            display: none;
+        }
+
+        .popup.active {
+            display: block;
+        }
+
+        .btn {
+            color:var(--white) !important;
+        }
+
+        .event-section {
+            overflow-x: hidden;
+        }
+
+        .ads-section {
+            background-color: var(--accent);
+            height: 100px;
+            width: 100%;
+            margin:1em 0;
+        }
+
+        .col-md-2 .ads-section {
+            height: 40vh;
+        }
+
+        .carousel-item {
+            height: 350px;
+        }
+
+        @media(max-width:50em) {
+            .event-container {
+                position: relative;
+                max-width: 100%;
+                margin: 5px auto;
+                font-size: 1em;
+                line-height: 1.6;
+                display: grid;
+                /* grid-template-columns: 1fr 1fr; */
+                grid-gap: 1em;
+                overflow-x: hidden;
+            }
+            .media {
+                padding: 0;
+            }
+            .media img {
+                /* height: 100px; */
+                width:auto;
+            }
+        }
+    </style>
+</head>
+<body>
+    <%- include('../partial/header') %>
+
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-lg-2 col-md-2 col-xs-12">
+                <div class="ads-section px-2 py-2"></div>
+                <div class="ads-section px-2 py-2"></div>
+                <div class="ads-section px-2 py-2"></div>
+            </div>
+            <div class="col-lg-8 col-md-8 col-xs-12">
+                <div class="ads-section px-2 py-2"></div>
+
+                <div class="event-section px-2">
+                    <div class="text-left mt-2 px-0">
+                        <h2 class=""><%= event.event_name %></h2>
+                        <p class="mb-1">
+                            Posted By <a href="/user_profile/<%= event.added_by %>/" class="link"><%= event.added_by %></a>  on <%= new Date(event.start_date).toDateString() %>
+                        </p>
+                    </div>
+                    
+                    <div class="event-container">
+                        <div class="text-content">            
+                            <div class="created_on d-flex">
+                                <span>Created on <%= new Date(event.added_on).toDateString() %></span>
+                                <span class="">
+                                    <i class="fa fa-eye"></i> <%= event.views_count %>
+                                </span>
+                            </div>
+            
+                            <% if (user.username) {%>
+                            <div class="mt-1">
+                                <% if (user.username == event.added_by) {%>
+                                    <a 
+                                        href="/event/update/<%= event.event_name %>/<%= event.description_id  %>/" 
+                                        class="btn btn-sm btn-primary mt-2 update-btn"
+                                    >
+                                        <i class="fa fa-edit"></i>
+                                        Update
+                                    </a>
+                                <%} %>
+            
+                                <% if (user.is_admin && !event.is_posted) {%>
+                                    <button 
+                                        data-href="/post_event/<%= event.event_id %>/<%= event.description_id  %>/<%= event.user_id  %>/" 
+                                        data-event="event" 
+                                        data-event-name="<%= event.event_name %>"
+                                        data-event-id="<%= event.event_id %>"
+                                        class="btn btn-sm bg-primary mt-2 btn-action"
+                                    >
+                                        Post
+                                    </button>
+                                <%} %>
+            
+                                <% if (user.is_admin || user.username == event.added_by) {%>
+                                    <button 
+                                        data-href="/delete_event/<%= event.event_id %>/" 
+                                        data-event="event" 
+                                        class="btn btn-sm bg-danger mt-2 btn-action"
+                                    >
+                                        <i class="fa fa-trash"></i>
+                                        Delete
+                                    </button>
+                                <%} %>
+                                
+                                <% if (user.username != event.added_by) {%>
+                                    <button 
+                                        data-id="<%= event.description_id  %>" 
+                                        data-cont="<%= event.is_contribution %>" 
+                                        data-event="<%= event.event_name %>" 
+                                        class="btn btn-sm btn-warning mt-2 btn-report"
+                                    >
+                                        Report
+                                    </button>
+                                <%} %>
+                            </div>
+                            <%} %>
+                        </div>  
+                        <div class="media">
+                        <div id="carousel<%= event.description_id %>" class="carousel slide" data-ride="carousel">
+                            <div class="carousel-inner">
+                                <% for (let index in event.media) { let media = event.media[index]; %>
+                                    <% if(index == 0) {%>
+                                        <div class="carousel-item active">
+                                    <%} else {%>
+                                        <div class="carousel-item">
+                                    <%} %>
+            
+                                        <% if (media.type == "image") {%>
+                                            <img src="../../.<%= media.media %>" class="d-block w-100" alt="<%= event.event_name %>">
+                                        <%} else {%>
+                                            <video width='auto' height='250' controls>
+                                                <source src="../../.<%= media.media %>" type='video/mp4'>
+                                                Your browser does not support the video tag.
+                                            </video>
+                                        <%} %>
+
+                                    </div>
+                                <%} %>
+                            </div>
+            
+                            <a class="carousel-control-prev" href="#carousel<%= event.description_id %>" role="button" data-slide="prev">
+                                <span class="carousel-control-prev-icon bg-dark" aria-hidden="true"></span>
+                                <span class="sr-only">Previous</span>
+                              </a>
+                              <a class="carousel-control-next " href="#carousel<%= event.description_id %>" role="button" data-slide="next">
+                                <span class="carousel-control-next-icon bg-dark" aria-hidden="true"></span>
+                                <span class="sr-only">Next</span>
+                              </a>
+                            </div>
+                            <!-- video element -->
+                        </div>
+
+                        <div class="info-line d-flex">
+                            <div class="d-flex text-muted">
+                                <p class="mb-0">
+                                    <%= event.street_number %> <%= event.street_name %> <%= event.suburb %> <%= event.city  %> <%=event.state  %> <%=event.country %>
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="d-flex">
+                            <div class="d-flex text-muted">
+                                <b class="mr-2">From</b>  
+                                <p class="mb-0"> <%= new Date(event.start_date).toDateString() %> at  <%= event.start_time.slice(0, -9) %></p>
+                            </div>
+            
+                            <div class="d-flex text-muted mx-2">
+                                <b class="mr-2">To</b>  
+                                <p class="mb-0"> <%= new Date(event.end_date).toDateString() %> at  <%= event.end_time.slice(0, -9) %></p>
+                            </div>
+                        </div>
+
+                        <div class="my-2">
+                            <b class="mb-0">Event Description</b>
+                            <p><%= event.event_description %> </p>
+                        </div>
+                    </div>
+            
+                    <!-- other users contribution -->
+                    <%  for (let event of contribution ) {%>
+                        <div class="event-container my-2">
+                            <div class="text-content">            
+                                <div class="created_on d-flex">
+                                    <span>Created on <%= new Date(event.added_on).toDateString() %></span>
+                                    <span class="">
+                                        <i class="fa fa-eye"></i> <%= event.views_count %>
+                                    </span>
+                                </div>
+            
+                                <% if(user.username) {%>
+                                <div class="mt-1">
+                                    <% if (user.username == event.added_by) {%>
+                                        <a 
+                                            href="/event/update/<%= event.event_name %>/<%= event.description_id  %>/" 
+                                            class="btn btn-sm btn-primary mt-2 update-btn"
+                                        >
+                                            <i class="fa fa-edit"></i>
+                                            Update
+                                        </a>
+                                    <%} %>
+            
+                                    <% if (!event.is_published) {%>
+                                        <button 
+                                            data-href="/publish_contribution/<%= event.description_id  %>/<%= event.user_id  %>/" 
+                                            data-event="contribution" 
+                                            data-event-name="<%= event.event_name %>" 
+                                            data-event-id="<%= event.event_id %>"
+                                            class="btn btn-sm btn-primary mt-2 btn-action"
+                                        >
+                                            Publish
+                                        </button>
+                                    <%} %>
+            
+                                    <% if (user.is_admin || user.username == event.added_by) {%>
+                                        <button 
+                                            data-href="/delete_contribution/<%= event.description_id  %>/"  
+                                            data-event="contribution" 
+                                            class="btn btn-sm bg-danger mt-2 btn-action"
+                                        > 
+                                            <i class="fa fa-trash"></i>
+                                            Delete 
+                                        </button>
+                                    <%} %>
+                                    
+                                    <% if (user.is_admin || user.username != event.added_by) {%>
+                                        <button 
+                                            data-id="<%= event.description_id  %>" 
+                                            data-cont="<%= event.is_contribution %>" 
+                                            data-event="<%= event.event_name %>" 
+                                            class="btn btn-sm bg-warning mt-2 btn-report"
+                                        >
+                                            Report
+                                        </button>
+                                    <%} %>
+                                </div>
+                                <% }%>
+                            </div>
+            
+                            <div class="media">
+                                <div id="carousel<%= event.description_id %>" class="carousel slide" data-ride="carousel">
+                                    <div class="carousel-inner">
+                                        <% for (let index in event.media) { let media = event.media[index]; %>
+                                            <% if(index == 0) {%>
+                                                <div class="carousel-item active">
+                                            <%} else {%>
+                                                <div class="carousel-item">
+                                            <%} %>
+            
+                                                <% if (media.type == "image") {%>
+                                                    <img src="../../.<%= media.media %>" class="d-block w-100" alt="<%= event.event_name %>">
+                                                <%} else {%>
+                                                    <video width='auto' height='250' controls>
+                                                        <source src="../../.<%= media.media %>" type='video/mp4'>
+                                                        Your browser does not support the video tag.
+                                                    </video>
+                                                <%} %>
+                                            </div>
+                                        <%} %>
+                                    </div>
+            
+                                    <a class="carousel-control-prev" href="#carousel<%= event.description_id %>" role="button" data-slide="prev">
+                                        <span class="carousel-control-prev-icon bg-dark" aria-hidden="true"></span>
+                                        <span class="sr-only">Previous</span>
+                                      </a>
+                                      <a class="carousel-control-next " href="#carousel<%= event.description_id %>" role="button" data-slide="next">
+                                        <span class="carousel-control-next-icon bg-dark" aria-hidden="true"></span>
+                                        <span class="sr-only">Next</span>
+                                      </a>
+                                </div>
+                                <!-- video element -->
+                            </div>
+
+                            <div class="info-line d-flex">
+                                <div class="d-flex text-muted">
+                                    <p class="mb-0">
+                                        <%= event.street_number %> <%= event.street_name %> <%= event.suburb %> <%= event.city  %> <%=event.state  %> <%=event.country %>
+                                    </p>
+                                </div>
+                            </div>
+    
+                            <div class="d-flex">
+                                <div class="d-flex text-muted mr-2">
+                                    <b class="mr-2">Contributer</b>
+                                    <a href="/user_profile/<%= event.added_by %>/" class="link"><%= event.added_by %></a>
+                                </div>
+                                <div class="d-flex text-muted">
+                                    <b class="mr-2">From</b>  
+                                    <p class="mb-0"> <%= new Date(event.start_date).toDateString() %> at  <%= event.start_time.slice(0, -9) %></p>
+                                </div>
+                
+                                <div class="d-flex text-muted mx-2">
+                                    <b class="mr-2">To</b>  
+                                    <p class="mb-0"> <%= new Date(event.end_date).toDateString() %> at  <%= event.end_time.slice(0, -9) %></p>
+                                </div>
+                            </div>
+    
+                            <div class="my-2">
+                                <b class="mb-0">Event Description</b>
+                                <p><%= event.event_description %> </p>
+                            </div>
+                        </div>
+                    <%} %>
+                    
+                    <% if (user.username && !hasContributed) {%>
+                        <div class="update-section d-flex d-none">
+                            <div class="mt-1">
+                                <a href="/event/add-description/<%= event.event_name %>/<%= event.event_id %>" class="btn btn-secondary mt-2">Add description</a>
+                            </div>
+                        </div>
+                    <%} %>        
+            
+                    <div class="popup" id="report-section">
+                        <div class="content">
+                            <div class="close-btn" onclick="togglePopup(reportSection, 'active')">&times;</div>
+                            <form action="" id="report-form" method="POST">
+                                <div class="d-none">
+                                    <input type="text" name="event_name" id="event-name">
+                                    <input type="text" name="description_id" id="description-id">
+                                    <input type="text" name="is_contribution" id="is-contribution">
+                                </div>
+                                <label for="reason">Reason for Reporting</label>
+                                <textarea name="reason" id="" cols="30" rows="10" placeholder="Reason for reporting event" value="" required></textarea>
+            
+                                <button type="submit" class="btn bg-warning" id="btn-form">Report Event</button>
+                            </form>
+            
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-2 col-md-2 col-xs-12">
+                <div class="ads-section px-2 py-2"></div>
+                <div class="ads-section px-2 py-2"></div>
+                <div class="ads-section px-2 py-2"></div>
+            </div>
+        </div>
+        
+    </div>  
+    <script>
+        // hide or display the update event button
+        let updateButton = document.querySelector(".update-btn");
+        if(!updateButton) {
+            let updateSection = document.querySelector(".update-section");
+            updateSection.classList.toggle("d-none");
+        }
+
+        // action buttons
+        let actionButtons = document.querySelectorAll(".btn-action")
+        actionButtons.forEach(btn => {
+            btn.addEventListener("click", function(e) {
+                // get the attributes
+                console.log( btn.getAttribute("data-href"));
+                let url = btn.getAttribute("data-href");
+                let eventType = btn.getAttribute("data-event");
+                let eventName = btn.getAttribute("data-event-name");
+                let eventId = btn.getAttribute('data-event-id');
+
+                // send the request
+                executeAction(url, eventType, eventId, eventName);
+            });
+        });
+
+        function executeAction(url, eventType, event_id, eventName) {
+            console.log("Executing");
+            console.log(url);
+            $.ajax({
+                url:url,
+                data:{eventName:eventName, event_id},
+                type:'POST',
+                success:function(response) {
+                    console.log(response);
+
+                    // 
+                    if(eventType == "contribution") {
+                        window.location.reload();
+                    } else {
+                        window.location.assign("/map");
+                    }
+                },
+                error:function(error) {
+                    console.log(error);
+                }
+            });
+        }
+
+        // get all report button
+        let reportButtons = document.querySelectorAll(".btn-report");
+        reportButtons.forEach(btn => {
+            btn.addEventListener("click", function(e) {
+                let report_id = btn.getAttribute("data-id");
+
+                // toggle form and update form fields
+                $('#description-id').val(btn.getAttribute('data-id'));
+                $('#is-contribution').val(btn.getAttribute('data-cont'));
+                $('#event-name').val(btn.getAttribute('data-event'));
+
+                togglePopup(reportSection, "active");
+
+                // update the 
+                $("#btn-form").text(btn.textContent);
+
+            });
+        });
+
+        let reportSection = document.getElementById("report-section");
+
+        $("#report-button").on("click", function(e) {
+            togglePopup(reportSection, "active");
+        });
+
+        function togglePopup(element, className="active") {
+            element.classList.toggle(className);
+        }
+
+
+        // report account
+        $("#report-form").on("submit", function(e) {
+            // prevent default behaviour
+            e.preventDefault();
+
+            let data = $("#report-form").serialize();
+
+            $.ajax({
+                url:'/report-event/',
+                type:'POST',
+                data:data,
+                success:function(response) {
+                    let message = response.message;
+                    console.log(message);
+
+                    if(message.includes("Success")) {
+                        $("#report-form").append(
+                            `<div class='alert alert-success'>${message}</div>`
+                        );
+                    } else {
+                        $("#report-form").append(
+                            `<div class='alert alert-danger'>${message}</div>`
+                        );
+                    }
+
+                    setTimeout(() =>{
+                        togglePopup(reportSection, "active");
+                        // reset form
+                        $("#report-form")[0].reset();
+                        $("#report-form .alert").remove();
+                    }, 5000);
+                },
+                error:function(err) {
+                    console.error(err);
+                }
+            });
+        });
+
+        window.onload = function(e) {
+            $.ajax({
+                url:'/event/update_count/',
+                data:{event_id:'<%= event.event_id %>'},
+                type:'POST',
+                success:function(res) {
+                    console.log(res);
+                },
+                error:function(err) {
+                    console.error(err);
+                }
+            })
+        }
+    </script>
+</body>
+</html>

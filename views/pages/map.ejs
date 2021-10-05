@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Event Map</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
+	<link href='https://api.mapbox.com/mapbox-gl-js/v1.12.0/mapbox-gl.css' rel='stylesheet' />
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="/static/css/design.css">
+    <link rel="stylesheet" type="text/css" href="/static/css/map.css">
+    <style>
+        .filter-section {
+            background-color: grey;
+            padding:0.25rem;
+            position: absolute;
+            top: 0%;
+            left: -90%;
+            bottom: 0%;
+            right: 1%;
+            z-index: 3;
+            width: 90%;
+            transition-duration: 0.5s;
+        }
+
+        .filter-section.open {
+            left: 0;
+        }
+
+        .filters {
+            text-align: center;
+            margin-bottom: 2rem;
+            display: flex;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .filters * {
+            display: inline-block;
+        }
+
+        .filters label {
+            padding: 0.5rem 1rem;
+            margin-bottom: 0.25rem;
+            /* border-radius: 2rem; */
+            min-width: 50px;
+            line-height: normal;
+            cursor: pointer;
+            transition: all 0.1s;
+            font-size: 1rem;
+            background-color: var(--white);
+        }
+
+        .filters label.active {
+            background-color: var(--green);
+            color: var(--white);
+        }
+
+        .filters label:hover {
+            background: var(--green);
+            color: var(--white);
+        }
+
+        .filter-section .btn-close {
+            position:absolute;
+            right:1%;
+            top:0%;
+        }
+
+        .filters span {
+            font-size: 1rem;
+        }
+
+        #open-filter {
+            z-index: 2;
+            position: absolute;
+            font-size: 1rem;
+            font-weight: 600;
+            background-color: var(--white);
+            left: 1%;
+            bottom: 1%;
+        }
+
+        @media (min-width:50em) {
+            .filter-section {
+                top:0%;
+                height: 100%;
+                left: -30vw;
+                width:30vw;
+            }
+
+            .filter-section.open {
+                left:0%;
+            }
+
+            .filters {
+                display: inline-block;
+            }
+
+            #open-filter {
+                top: 1%;
+                bottom: 90%;
+            }
+        }
+
+    </style>
+</head>
+<body>
+    <%- include('../partial/header') %>
+    <div id="map">
+        <%- include('../partial/spinner') %>
+        <button class="btn" id="open-filter">
+            <i class="fa fa-filter"></i>
+            FILTER
+        </button>
+
+        <div class="filter-section" id="filter-section">
+            <button class="btn btn-close" id="close-filter">
+                <i class="fa fa-close"></i>
+            </button>
+
+            <div class="my-3 text-white">
+                <h3>Time Filter</h3>
+            </div>
+
+            <div class="filters">
+                <div class="past-filter">
+                    <div class="">
+                        <label for="earliest">Earliest</label>
+                    </div>
+
+                    <div class="">
+                        <label for="6m-past">6m</label>
+                    </div>
+
+                    <div class="">
+                        <label for="1m-past">1m</label>
+                    </div>
+
+                    <div class="">
+                        <label for="2wk-past">2w</label>
+                    </div>
+
+                    <div class="">
+                        <label for="1wk-past">1w</label>
+                    </div>
+
+                    <div class="">
+                        <label for="24hr-past">24hr</label>
+                    </div>
+                </div>
+
+                <div class="mx-1">
+                    <span class="text-white">
+                        <i class="fa fa-arrow-left mx-2"></i>
+                        Past
+                    </span>
+
+                    <div class="">
+                        <label for="current" class="">Current</label>
+                    </div>
+
+                    <div class="">
+                        <label for="all" class="active">All</label>
+                    </div>
+
+                    <span class="text-white">
+                        Upcoming
+                        <i class="fa fa-arrow-right mx-2"></i>
+                    </span>
+                </div>
+
+                <div>
+                    <div class="">
+                        <label for="next-24hr">24hr</label>
+                    </div>
+
+                    <div class="">
+                        <label for="next-1wk">1w</label>
+                    </div>
+
+                    <div class="">
+                        <label for="next-2wk">2w</label>
+                    </div>
+
+                    <div class="">
+                        <label for="next-1m">1m</label>
+                    </div>
+
+                    <div class="">
+                        <label for="next-6m">6m</label>
+                    </div>
+
+                    <div class="">
+                        <label for="latest">Latest</label>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    
+    <div class="aside-section">
+         <div class="close-btn" onclick="togglePopup(asideSection, 'open')">&times;</div>
+         <section id="aside-section">
+
+         </section>
+    </div>  
+
+    <div class="popup" id="addEvent">
+        <div class="overlay"></div>
+        <div class="content">
+            <div class="close-btn" onclick="togglePopup(addEventDiv, 'active')">&times;</div>
+            <h1 class="description-title">Add an event</h1>
+    
+            <form action="" method="post" id="event-description" enctype="multipart/form-data">
+                <div class="mb-3">
+                    <input type="text" name="event_name" placeholder="Name Event (Use key words)" required>
+                </div>
+               
+                <div class="mb-3">
+                    <input type="date" name="start_date" placeholder="Start Date" required>
+                </div>
+
+                <div class="mb-3">
+                    <input type="time" name="start_time" placeholder="Start Time" required>
+                </div>
+
+                <div class="mb-3">
+                    <input type="date" name="end_date" placeholder="End Date" required>
+                </div>
+
+                <div class="mb-3">
+                    <input type="time" name="end_time" placeholder="End Time"  value="" required>
+                </div>
+
+                <div class="mb-3">
+                    <textarea placeholder="Describe the event" id="description" maxlength="1000" name="event_description" row=12 required></textarea>
+                    <div class="text-muted text-right" id="textarea_message"></div>
+                </div>
+               
+                <div class="mb-3"> 
+                    <label for="event-media">Add pictures</label>
+                </div>
+
+                <div class="mb-3">
+                    <input type="file" name="photo" id="file" accept="image/*" multiple>
+                </div>
+
+                <div class="mb-3">
+                    <label for="event-media">Add video</label>
+                </div>
+                
+                <div class="mb-3">
+                    <input type="file" name="video" id="video" accept="video/*" multiple>
+                </div>
+
+                <div>
+                    <!-- <input type="submit" name="add-event" value="Add Event"> -->
+                    <button type="submit" name="add-event">Add Event</button>
+                </div>
+               
+            </form>
+        </div>
+    </div>
+
+    <div class="popup" id="confirm-location">
+        <div class="overlay"></div>
+        <div class="content" id="address">
+            <div class="close-btn" onclick="togglePopup(confirmLocation, 'active')">&times;</div>
+            <form action="" class="" id="event-location">
+                <h1>Confirm the Location</h1>
+                <div class="mb-3">
+                    <input type="number" name="street_number" placeholder="Street Number">
+                </div>
+                <div class="mb-3">
+                     <input class="form-control" type="text" name="street_name" placeholder="Street Name">
+                </div>
+
+                <div class="mb-3">
+                     <input class="form-control" type="text" name="locality" placeholder="Locality">
+                </div>
+                
+                <div class="mb-3">
+                     <input class="form-control" type="text" name="place" placeholder="Place">
+                </div>
+                <div class="mb-3">
+                     <input class="form-control" type="text" name="region" placeholder="region">
+                </div>
+                <div class="mb-3">
+                     <input class="form-control" type="text" name="country" placeholder="Country">
+                </div>
+                <div class="mb-3">
+                     <input class="form-control" type="text" name="lat" placeholder="Latitude">
+                </div>
+                <div class="mb-3">
+                     <input class="form-control" type="text" name="lng" placeholder="Longitude">
+                </div>
+                 
+                <button type="submit" name="confirm-location">Confirm Location</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="popup" id="account-section">
+        <div class="content">
+            <div class="close-btn" onclick="togglePopup(accountSection, 'active')">&times;</div>
+            <div class="header">
+                <h3 class="my-0"><%= user.username %></h3>
+                <p class="my-0"><%= user.country %></p>
+            </div>
+
+            <div class="tabs my-1">
+                <h4 class="tab-item my-0" id="stats">Statistics</h4>
+                <h4 class="tab-item active my-0" id="acc-info">Account Information</h4>
+            </div>
+
+            <div class="d-flex space-between">
+                <div class="account-info" id="account-info">
+                    <b>Email</b>
+                    <p> <%= user.email %> </p>
+
+                    <b>Country</b>
+                    <p> <%= user.country %> </p>
+
+                    <b>Account Status</b>
+                    <p> <%= user.email %> </p>
+
+                    
+                </div>
+                <div class="d-none" id="account-statistics">
+                    <p class="d-flex space-between">Events Added <span>5</span></p>
+                    <p class="d-flex space-between">Events contributed to <span>5</span></p>
+                    <p class="d-flex space-between">Followers 
+                        <span> 
+                            <% if (user.account_type == 'pro') {%>
+                                <i class="fa fa-lock"></i>
+                            <%} %>
+                            5
+                        </span>
+                    </p>
+                    <p class="d-flex space-between">Following <span>15</span></p>
+                </div>
+            </div>
+
+            <div class="my-1">
+                <a  href="/logout" class="btn bg-danger">Logout</a>
+            </div>
+           
+        </div>
+    </div>
+    <div class="popup" id="events">
+        <div class="content">
+            <div class="popup-header">
+                <h4 class="my-0"> Events Added</h4>
+            </div>
+
+            <div class="table">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Event Title</th>
+                            <th>Country</th>
+                            <th>Start Date</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        <%  for (let event of [1,24,5] ) {%>
+                        <tr>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td> 
+                                <a href="" class="btn">View</a>
+                            </td>
+                        </tr>
+                        <%} %>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="popup" id="events">
+        <div class="content">
+            <div class="popup-header">
+                <h4 class="my-0"> Events Contributions</h4>
+            </div>
+
+            <div class="table">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Event Title</th>
+                            <th>Country</th>
+                            <th>Start Date</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        <%  for (let event of [1,24,5] ) {%>
+                        <tr>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td> 
+                                <a href="" class="btn">View</a>
+                            </td>
+                        </tr>
+                        <%} %>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script src='https://api.mapbox.com/mapbox-gl-js/v1.12.0/mapbox-gl.js'></script>
+    <script src="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v4.5.1/mapbox-gl-geocoder.min.js"></script>
+    <link
+    rel="stylesheet"
+    href="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v4.5.1/mapbox-gl-geocoder.css"
+    type="text/css"
+    />
+
+    <!-- Promise polyfill script required to use Mapbox GL Geocoder in IE 11 -->
+    <script src="https://cdn.jsdelivr.net/npm/es6-promise@4/dist/es6-promise.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/es6-promise@4/dist/es6-promise.auto.min.js"></script>
+    <script type="text/javascript" src="/static/js/main.js"></script>
+    <script src="/static/js/validateInput.js"></script>
+</body>
+</html>

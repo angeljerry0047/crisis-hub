@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Update Event Information</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="/static/css/design.css">
+    <style>
+         @media(min-width:50em) {
+            .container {
+                min-width: 500px;
+                margin: 1em auto;
+                font-size: 0.9em;
+                overflow-x: hidden;
+            }
+
+        }
+    </style>
+</head>
+<body>
+    <%- include('../partial/header') %>
+    <div class="container">
+        <div class="content">
+			<% if (event.is_contribution) {%>
+            	<h1 class="description-title">Update Your Contribution</h1>
+			<%} else {%>
+				<h1 class="description-title">Update Your Event</h1>
+			<%} %>
+
+            
+            <form class="my-3" action="" method="post" id="event-description" enctype="multipart/form-data">
+				<div class="row">
+					<div class="col">
+						<div>
+							<label for="event_name">Event Name</label>
+							<input 
+                                type="text" 
+                                name="event_name" 
+                                value="<%= event.event_name %>"
+                                placeholder="Name Event (Use key words)" required readonly>
+						</div>
+
+						<div>
+							<label for="start_date">Start Date</label>
+							<input 
+								type="date" 
+								name="start_date" 
+								placeholder="Start Date" 
+							/>
+						</div>
+						<div>
+							<label for="start_time">Start Time</label>
+							<input 
+								type="time" 
+								name="start_time" 
+								placeholder="Start Time" 
+								value=""
+							/>
+						</div>
+
+						<div>
+							<label for="end_date">End Date</label>
+							<input  
+								type="date" 
+								name="end_date" 
+								placeholder="End Date" 
+							/>
+						</div>
+
+						<div>
+							<label for="">End Time</label>
+							<input 
+								type="time" 
+								name="end_time" 
+								placeholder="End Time"  
+							/>
+						</div>
+
+					</div>
+					<div class="col">
+						
+
+						<div>
+							<label for="event_description">Event Description</label>
+							<textarea 
+								placeholder="Describe the event" 
+								id="description" 
+								name="event_description" 
+								rows="10"
+								maxlength="1000"
+								required
+							><%= event.event_description.toString().trim() %></textarea>
+							<span class="text-danger" id="textarea_message"></span>
+						</div>
+
+						<div>
+							<label for="event-media">Add pictures</label>
+							<input type="file" name="photo" id="file" accept="image/*" multiple>
+							<span id="pic-message"></span>
+						</div>
+
+						<div>
+							<label for="event-media" class="label">Add video</label>
+                			<input type="file"  name="video" id="video" accept="video/*" multiple>
+							<span id="video-message"></span>
+						</div>
+					</div>
+				</div>          
+                <!-- <input type="submit" name="add-event" value="Add Event"> -->
+				<div class="w-100 justify-content-center d-flex">
+					<button type="submit" name="add-event" class="my-3 w-25">Contribute to Event</button>
+				</div>
+            </form>
+        </div>
+    </div>
+
+<script>
+var eventDescription = {};
+var eventDescriptionForm = document.getElementById("event-description");
+$(eventDescriptionForm).on("submit", function(e) {
+	e.preventDefault();
+	
+	// get the form data
+	let data = $(this).serializeArray();
+
+	console.log(data);
+
+	// update event description
+	data.forEach(datum => {
+		let name = datum.name;
+		eventDescription[name] = datum.value; 
+	});
+
+	// event data
+    eventDescription.event_id = parseInt("<%= event.event_id %>");
+	eventDescription.description_id = parseInt("<%= event.description_id %>");
+	eventDescription.added_by = "<%= user.username %>";
+	eventDescription.is_contribution = "<%= event.is_contribution %>";
+
+	console.log(eventDescription);
+
+	// create a FormData object
+	var fd = new FormData();
+
+	Object.keys(eventDescription).forEach(key => {
+		fd.append(key, eventDescription[key]);
+	});
+
+	// add the image file
+	var files = $('#file')[0].files;
+	Object.values(files).forEach((file, index) => {
+		let name = "photo" + index;
+		fd.append(name, file);
+	});
+
+	// fd.append('photo',files);
+
+	// add the video file
+	var video = $('#video')[0].files;
+	Object.values(video).forEach((file, index) => {
+		let name = "video" + index;
+		fd.append(name, file);
+	});
+
+	// fd.append('video',video);
+	console.log(Object.entries(fd));
+	console.log(fd);
+
+	// submit url
+	let url = eventDescription.description_id ? '/update_event_description/' : '/create_event_description/';
+
+	// submit the data
+	$.ajax({
+		url:url,
+		type:'POST',
+		data:fd,
+		dataType: 'json',
+		contentType: false,
+		processData:false,
+		success:function(response) {
+            console.log(response);
+            
+            // 
+			if(response.message.includes="success") {
+                alert("Contribution posted, awaiting admin approval");
+                
+                setTimeout((e) => {
+                    window.location.assign("/event/<%= event.event_name %>/<%= event.event_id %>/")
+                }, 3000);
+                
+			} else {
+				alert(response.message);
+			}
+
+			// reset the form values
+			eventDescriptionForm.reset();
+            updateEventObject = {};
+			
+		},
+		error:function(error) {
+			// alert("error");
+			console.log(error);
+		}
+	});
+
+});
+</script>
+<script src="/static/js/validateInput.js"></script>
+</body>
+</html>

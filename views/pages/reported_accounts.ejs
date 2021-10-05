@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reported Accouns</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="/static/css/design.css">
+   <!-- CSS only -->
+    <!-- <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-giJF6kkoqNQ00vy+HMDP7azOuL0xtbfIcaT9wjKHr8RbDVddVHyTfAAsrekwKmP1" crossorigin="anonymous"> -->
+    <link rel="stylesheet" href="/static/css/list.css">
+</head>
+<body>
+    <%- include('../partial/header') %>
+    <link rel="stylesheet" type="text/css" href="/static/css/design.css">
+    <div class="main">
+        <div class="col-sm-12 col-md-9 col-xs-12">
+            <!-- create a table -->
+            <div class="text-right mt-5"> 
+                <!-- Showing 1 to 2 of 2 items -->
+                Reported Accounts
+            </div>
+            <!-- create a table -->
+            
+            <table class="table">
+                <thead>
+                    <th>User</th>
+                    <th>Reported By</th>
+                    <th>Date</th>
+                    <th>Reason</th>
+                    <th>Action</th>
+                    <th></th>
+                </thead>
+                <tbody>
+                    <% for (let report of users) {%>
+                        <tr>
+                            <td>
+                                <a class="link" href="/user_profile/<%= report.account_name %>/"><%= report.account_name %></a>
+                            <td>
+                                <a class="link" href="/user_profile/<%= report.reported_by %>/"><%= report.reported_by %></a> 
+                            </td>
+                            <td><%= new Date(report.date).toDateString()%></td>
+                            <td><%= report.reason.slice(0, 10) %> ...</td>
+                            <td>
+                                <button data-id="<%= report.report_id %>" class="link btn btn-warning btn-remove">Remove</button>
+                            </td>
+                            <td>
+                                <a href="/reported-accounts/<%= report.report_id %>/" class="link btn btn-warning">View</a>
+                            </td>
+                        </tr>
+                    <%} %>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        let removButtons = document.querySelectorAll(".btn-remove");
+        removButtons.forEach(btn => {
+            btn.addEventListener("click", function(e) {
+                let report_id = btn.getAttribute("data-id");
+
+                deleteFromReports(report_id);
+            });
+        });
+
+
+        function deleteFromReports(report_id) {
+            let url = "/reported-account/remove/"+report_id+"/";
+
+            $.ajax({
+                url:url,
+                type:'POST',
+                success:function(response) {
+                    if(response.message.includes("success")) {
+                        window.location.reload();
+                    }
+                },
+                error:function(err) {
+                    console.error(err);
+                }
+            });
+        }
+    </script>
+</body>
+</html>

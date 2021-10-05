@@ -1,0 +1,213 @@
+<link rel="shortcut icon" href="#">
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js" integrity="sha384-B4gt1jrGC7Jh4AgTPSdUtOBvfO8shuf57BaghqFfPlYxofvL8/KUEfYiJOMMV+rV" crossorigin="anonymous"></script>
+
+<nav class="navbar navbar-expand-lg navbar-light top-bar">
+    <a class="navbar-brand text-white" href="/">Crisis Hub</a>
+
+    <button class="navbar-toggler bg-white" type="button" data-toggle="collapse" data-target="#navbar" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <!-- <button class="navbar-toggler"><i class="fa fa-bars"></i></button> -->
+    <div class="collapse navbar-collapse" id="navbar">
+        <ul class="navbar-nav mr-auto">
+            <% if (user && typeof user.username != 'undefined') {%>
+                <% if (section == "map") {%>
+                    <div id="search" class="search-tab form-inline my-2 my-lg-0">
+                        <input type="search" placeholder="Event Name ..." id="search-event" class="form-control">
+                        <div class="suggestions" id="suggestions">
+                        </div>
+                    </div>
+                    <li class="nav-item">
+                        <a class="nav-link" id="add-event" href="#">Add Event</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link d-none" id="update-event" href="#">Update Event</a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" id="saved-events">Saved Events</a> 
+                    </li>
+                    <%} else { %>
+                        
+                        <li class="nav-item">
+                            <a class="nav-link" id="user-name" href="/map">
+                                View Map
+                            </a>
+                        </li>
+                    <%} %>
+                    
+                    <% if (user.is_admin) {%>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/dashboard">
+                                Dashboard
+                            </a>
+                        </li>
+                    <%} %>
+                    
+                <li class="nav-item">
+                    <a class="nav-link" href="/refer_people">Refer for Points</a> 
+                </li>
+                <li class="nav-item">
+                    <a href="/logout" class="nav-link">Logout</a>  
+                </li>
+             <%} else { %>
+                <% if (section == "map") {%>
+                    <div id="search" class="search-tab form-inline my-2 my-lg-0">
+                        <input type="search" placeholder="Event Name ..." id="search-event" class="form-control">
+                        <div class="suggestions" id="suggestions">
+                        </div>
+                    </div>
+                <%} %>
+                <li class="nav-item">
+                    <a href="/map" class="nav-link">Map</a>
+                </li>
+                <li class="nav-item">
+                    <a href="/register" class="nav-link">Register</a>
+                </li>
+                <li class="nav-item">
+                    <a href="/login" class="nav-link">Login</a>  
+                </li>
+
+            <%} %>
+        </ul>
+
+        <div class="inline-section text-white d-flex">
+            <% if (notifications) {%>
+                <div class="nav-link notification-link" href="#" id="notification-link">
+                    <i class="fa fa-bell"></i>
+                    <span class="badge bg-danger">
+                        <%= notifications.length %>
+                    </span>
+                </div>
+            <%} %>
+
+            <% if (user && typeof user.username != 'undefined') {%>
+                <div>
+                    <a 
+                        class="nav-link text-white" 
+                        id="user-name" 
+                        data-admin="<%= user.is_admin %>" 
+                        data-user="<%= user.username %>"
+                        href="/user_profile/<%= user.username %>/"
+                    >   
+                        <i class="fa fa-user-circle"></i>
+                    </a>
+                </div>
+            <%} %>
+        </div>
+    </div>
+
+
+    <!-- <div class="head-menu">    
+        <% if (typeof user != 'undefined') {%>
+           
+                <div class="user-menu">
+                    <% if (section == "map") {%>
+                        <div id="search" class="search-tab">
+                            <input type="search" placeholder="Event Name ..." id="search-event">
+                            <div class="suggestions" id="suggestions">
+                            </div>
+                        </div>
+                        <a class="nav-item" id="add-event" href="#">Add Event</a>
+                        <a class="nav-item d-none" id="update-event" href="#">Update Event</a>
+                        <a class="nav-item" href="#" id="saved-events">Saved Events</a> 
+                    <%} else { %>
+                        <a class="nav-item" id="user-name" href="/map">
+                            View Map
+                        </a>
+                    <%} %>
+
+                    <% if (user.is_admin) {%>
+                        <a class="nav-item" href="/dashboard">
+                            Dashboard
+                        </a>
+                    <%} %>
+            <div>
+            <a class="nav-item" id="user-name" data-admin="<%= user.is_admin %>" href="/user_profile/<%= user.username %>/"><%= user.username %></a>   
+            <a href="/logout" class="nav-item">Logout</a>  
+        <%} else { %>
+            <a href="/register" class="nav-item">Register</a>
+            <a href="/login" class="nav-item">Login</a>  
+        <%} %>
+            </div>
+        </div>
+        
+    </div> -->
+</nav>
+
+<%- include('./notifications') %>
+
+<script>
+    let toggler = document.querySelector('#notification-link');
+    var notificationTab = document.querySelector('.notification-tab');
+
+    if(toggler) {
+        toggler.onclick = function(e) {
+            console.log("Toggle Location");
+
+            e.preventDefault();
+            e.stopPropagation();
+
+            notificationTab.classList.toggle("open");
+        } 
+    }
+
+    // mark as read
+    var buttonMarkAsRead = document.querySelectorAll(".btn-read");
+    buttonMarkAsRead.forEach(button => {
+        button.onclick = function(e) {
+            console.log(button.dataset);
+            let { notification } = button.dataset;
+
+            // console.log(e.target);
+            markAsRead(notification);
+        }
+    });
+
+    function markAsRead(notification_id) {
+        // toggle spinner
+
+        $.ajax({
+            url:'/read_notification/' + notification_id + '/',
+            type:'POST',
+            dataType:"JSON",
+            success:function(response) {
+                console.log(response);
+
+                // remove the message
+                $(`#message-${notification_id}`).remove();
+
+                // update the count
+                let count = $('span.badge').text().trim();
+                count = +count == 0 ? +count : +count -1;
+                $('span.badge').text(count);
+
+                // window.location.reload();
+            },
+            error:function(error) {
+                console.error(error);
+            }
+        })
+    }
+
+    // let notificationTab = document.getElementById('notification-tab');
+    $("#close-notification").on('click', function(e) {
+        e.stopPropagation();
+
+        $("#notification-tab").toggleClass("open");
+    });
+
+    $("body").on('click', function(e) {
+        let notificationTab = document.getElementById('notification-tab');
+        if(notificationTab.classList.contains('open') && notificationTab != e.target) {
+            $("#notification-tab").removeClass("open");
+        }
+
+    });
+</script>
+

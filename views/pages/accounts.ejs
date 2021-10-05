@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Account</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
+	<link href='https://api.mapbox.com/mapbox-gl-js/v1.12.0/mapbox-gl.css' rel='stylesheet' />
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="/static/css/design.css">
+   <!-- CSS only -->
+    <!-- <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-giJF6kkoqNQ00vy+HMDP7azOuL0xtbfIcaT9wjKHr8RbDVddVHyTfAAsrekwKmP1" crossorigin="anonymous"> -->
+    <link rel="stylesheet" href="/static/css/list.css">
+</head>
+<body>
+    <%- include('../partial/header') %>
+    <link rel="stylesheet" type="text/css" href="/static/css/design.css">
+    <div class="main">
+        <div class="col-sm-12 col-md-9 col-xs-12">
+            <!-- create a table -->
+            <div class="text-right mt-5"> 
+                <!-- Showing 1 to 2 of 2 items -->
+            </div>
+            <!-- create a table -->
+            <table class="table">
+                <thead>
+                    <th>Username</th>
+                    <th>Country</th>
+                    <th>Email</th>
+                    <th></th>
+                </thead>
+                <tbody>
+                    <% for (let account of users) {%>
+                        <tr>
+                            <td>
+                                <a href="/user_profile/<%= account.username %>/" ><%= account.username %></a>
+                            </td>
+                            <td><%= account.country %></td>
+                            <td><%= account.email %></td>
+                            <td>
+                                
+                            </td>
+                        </tr>
+                    <%} %>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</body>
+</html>
